@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}سجل العمليات{% endblock %}
+
+{% block content %}
+
+<section class="section-header">
+  <h1 class="page-title">سجل العمليات</h1>
+  <p class="page-sub">تاريخ كامل لجميع صفقات الشراء والبيع المنفذة بواسطة البوت</p>
+</section>
+
+<!-- ====== شريط الأدوات ====== -->
+<div class="logs-toolbar">
+  <div class="logs-count">
+    {% if logs %}
+      إجمالي العمليات: <strong>{{ logs|length }}</strong>
+    {% else %}
+      لا توجد عمليات مسجلة
+    {% endif %}
+  </div>
+  {% if logs %}
+  <form method="post" action="{{ url_for('clear_logs') }}"
+        onsubmit="return confirm('⚠️ هل أنت متأكد من حذف جميع السجلات؟ لا يمكن التراجع.')">
+    <button type="submit" class="btn btn-danger-sm">🗑 مسح السجل</button>
+  </form>
+  {% endif %}
+</div>
+
+<!-- ====== الجدول ====== -->
+{% if logs %}
+<div class="table-wrap">
+  <table class="log-table log-table-full">
+    <thead>
+      <tr>
+        <th>التوقيت</th>
+        <th>النوع</th>
+        <th>الزوج</th>
+        <th>السعر</th>
+        <th>الكمية</th>
+        <th>السبب / الملاحظات</th>
+        <th>الحالة</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for log in logs %}
+      <tr class="{% if 'شراء' in log.action %}row-buy{% elif 'بيع' in log.action %}row-sell{% endif %}">
+        <td class="mono text-muted text-sm">{{ log.timestamp }}</td>
+        <td>
+          <span class="action-badge
+            {% if 'شراء' in log.action and 'طارئ' not in log.action %}action-buy
+            {% elif 'بيع طارئ' in log.action %}action-emergency
+            {% elif 'بيع' in log.action %}action-sell
+            {% endif %}">
+            {{ log.action }}
+          </span>
+        </td>
+        <td class="mono font-bold">{{ log.symbol }}</td>
+        <td class="mono">
+          {% if log.price %}
+            {{ "{:,.6f}".format(log.price) }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td class="mono">
+          {% if log.qty %}
+            {{ "{:.8f}".format(log.qty) }}
+          {% else %}
+            <span class="text-muted">—</span>
+          {% endif %}
+        </td>
+        <td class="reason-col text-sm">{{ log.reason }}</td>
+        <td class="text-sm">{{ log.status }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<!-- حالة فارغة -->
+<div class="empty-state">
+  <div class="empty-icon">📋</div>
+  <p class="empty-title">لا توجد عمليات مسجلة</p>
+  <p class="empty-sub">ستظهر هنا سجلات الشراء والبيع بمجرد بدء تشغيل البوت وتنفيذ أولى الصفقات.</p>
+  <a href="{{ url_for('index') }}" class="btn btn-start">الذهاب للوحة التحكم</a>
+</div>
+{% endif %}
+
+{% endblock %}
