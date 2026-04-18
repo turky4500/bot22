@@ -1,0 +1,31 @@
+# بيانات سرية — لا تُرفع أبداً
+.env
+*.env
+
+# ملفات البوت الديناميكية (تُنشأ تلقائياً على الخادم)
+settings.json
+trade_logs.json
+position.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+venv/
+env/
+.venv/
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
