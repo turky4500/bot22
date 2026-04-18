@@ -5,191 +5,296 @@
 
 <section class="section-header">
   <h1 class="page-title">الإعدادات</h1>
-  <p class="page-sub">تخصيص جميع معلمات البوت واستراتيجية التداول</p>
+  <p class="page-sub">الإعدادات العامة، مفاتيح API، واتساب، وإدارة البوتات</p>
 </section>
 
+<!-- ====== الإعدادات العامة ====== -->
 <form method="post" action="{{ url_for('settings_page') }}" class="settings-form">
 
-  <!-- ====== وضع التشغيل ====== -->
+  <!-- وضع التشغيل -->
   <div class="settings-card">
     <h2 class="settings-section-title">⚡ وضع التشغيل</h2>
     <div class="mode-toggle-group">
       <label class="mode-option {% if settings.mode == 'virtual' %}mode-active{% endif %}">
-        <input type="radio" name="mode" value="virtual"
-               {% if settings.mode == 'virtual' %}checked{% endif %} />
+        <input type="radio" name="mode" value="virtual" {% if settings.mode == 'virtual' %}checked{% endif %} />
         <span class="mode-icon">🔵</span>
         <span class="mode-name">الوضع الافتراضي</span>
-        <span class="mode-desc">Testnet — أموال وهمية للتجربة</span>
+        <span class="mode-desc">Testnet — أموال وهمية</span>
       </label>
       <label class="mode-option {% if settings.mode == 'live' %}mode-active mode-live-active{% endif %}">
-        <input type="radio" name="mode" value="live"
-               {% if settings.mode == 'live' %}checked{% endif %} />
+        <input type="radio" name="mode" value="live" {% if settings.mode == 'live' %}checked{% endif %} />
         <span class="mode-icon">🔴</span>
         <span class="mode-name">الوضع الحقيقي</span>
-        <span class="mode-desc">Live — أموال حقيقية، توخَّ الحذر</span>
+        <span class="mode-desc">Live — أموال حقيقية</span>
       </label>
     </div>
-    {% if settings.mode == 'live' %}
-    <div class="live-warning">
-      ⚠️ أنت في الوضع الحقيقي! ستُنفَّذ الصفقات بأموال حقيقية.
-    </div>
-    {% endif %}
   </div>
 
-  <!-- ====== مفاتيح API ====== -->
+  <!-- مفاتيح API -->
   <div class="settings-card">
     <h2 class="settings-section-title">🔑 مفاتيح API</h2>
-
     <div class="api-block">
       <h3 class="api-block-title">الوضع الافتراضي — Testnet</h3>
       <div class="form-row">
-        <label class="form-label">مفتاح API</label>
+        <label class="form-label">API Key</label>
         <input type="password" name="virtual_api_key" class="form-input"
-               value="{{ settings.virtual_api_key }}"
-               placeholder="أدخل مفتاح Testnet API" autocomplete="off" />
+               value="{{ settings.virtual_api_key }}" placeholder="Testnet API Key" autocomplete="off"/>
       </div>
       <div class="form-row">
-        <label class="form-label">السر السري</label>
+        <label class="form-label">API Secret</label>
         <input type="password" name="virtual_api_secret" class="form-input"
-               value="{{ settings.virtual_api_secret }}"
-               placeholder="أدخل Testnet API Secret" autocomplete="off" />
+               value="{{ settings.virtual_api_secret }}" placeholder="Testnet API Secret" autocomplete="off"/>
       </div>
     </div>
-
     <div class="api-block api-block-live">
       <h3 class="api-block-title">الوضع الحقيقي — Live 🔴</h3>
       <div class="form-row">
-        <label class="form-label">مفتاح API</label>
+        <label class="form-label">API Key</label>
         <input type="password" name="live_api_key" class="form-input"
-               value="{{ settings.live_api_key }}"
-               placeholder="أدخل Live API Key" autocomplete="off" />
+               value="{{ settings.live_api_key }}" placeholder="Live API Key" autocomplete="off"/>
       </div>
       <div class="form-row">
-        <label class="form-label">السر السري</label>
+        <label class="form-label">API Secret</label>
         <input type="password" name="live_api_secret" class="form-input"
-               value="{{ settings.live_api_secret }}"
-               placeholder="أدخل Live API Secret" autocomplete="off" />
+               value="{{ settings.live_api_secret }}" placeholder="Live API Secret" autocomplete="off"/>
       </div>
     </div>
   </div>
 
-  <!-- ====== إعدادات التداول ====== -->
+  <!-- واتساب -->
   <div class="settings-card">
-    <h2 class="settings-section-title">📊 إعدادات التداول</h2>
-
-    <div class="form-grid">
-
-      <div class="form-row">
-        <label class="form-label">زوج العملة</label>
-        <select name="symbol" class="form-select">
-          {% for sym in symbols %}
-            <option value="{{ sym }}" {% if settings.symbol == sym %}selected{% endif %}>{{ sym }}</option>
-          {% endfor %}
-        </select>
-        <span class="form-hint">الزوج الذي سيتداول البوت عليه</span>
-      </div>
-
-      <div class="form-row">
-        <label class="form-label">مبلغ الشراء (USDT)</label>
-        <input type="number" name="order_amount" class="form-input"
-               value="{{ settings.order_amount }}" min="1" step="0.01" />
-        <span class="form-hint">المبلغ بالـ USDT لكل عملية شراء</span>
-      </div>
-
-      <div class="form-row">
-        <label class="form-label">الإطار الزمني</label>
-        <select name="timeframe" class="form-select">
-          {% for tf_value, tf_label in timeframes %}
-            <option value="{{ tf_value }}" {% if settings.timeframe == tf_value %}selected{% endif %}>
-              {{ tf_value }} — {{ tf_label }}
-            </option>
-          {% endfor %}
-        </select>
-        <span class="form-hint">الفترة الزمنية لكل شمعة في الرسم البياني</span>
-      </div>
-
-      <div class="form-row">
-        <label class="form-label toggle-label">
-          <span>السماح بالشراء المتكرر</span>
-          <label class="toggle-switch">
-            <input type="checkbox" name="allow_rebuy"
-                   {% if settings.allow_rebuy %}checked{% endif %} />
-            <span class="toggle-slider"></span>
-          </label>
+    <h2 class="settings-section-title">💬 إشعارات واتساب</h2>
+    <div class="form-row" style="margin-bottom:16px">
+      <label class="form-label toggle-label">
+        <span>تفعيل إشعارات واتساب</span>
+        <label class="toggle-switch">
+          <input type="checkbox" name="whatsapp_enabled"
+                 {% if settings.whatsapp_enabled %}checked{% endif %} />
+          <span class="toggle-slider"></span>
         </label>
-        <span class="form-hint">
-          إذا كان مفعلاً: يشتري مع كل إشارة جديدة (بشرط وجود رصيد).
-          إذا كان معطلاً: يشتري مرة واحدة فقط حتى تُغلق الصفقة.
-        </span>
-      </div>
-
+      </label>
+      <span class="form-hint">عند التفعيل ستصلك رسالة واتساب مع كل عملية شراء أو بيع</span>
     </div>
-  </div>
-
-  <!-- ====== إعدادات المؤشر ====== -->
-  <div class="settings-card">
-    <h2 class="settings-section-title">📐 إعدادات مؤشر بولينجر باند</h2>
-
     <div class="form-grid">
-
       <div class="form-row">
-        <label class="form-label">فترة المؤشر (Length)</label>
-        <input type="number" name="bb_length" class="form-input"
-               value="{{ settings.bb_length }}" min="5" max="200" step="1" />
-        <span class="form-hint">عدد الشموع لحساب المتوسط المتحرك (الافتراضي: 20)</span>
+        <label class="form-label">رقم الجوال (مع الكود الدولي)</label>
+        <input type="text" name="whatsapp_phone" class="form-input"
+               value="{{ settings.get('whatsapp_phone','') }}"
+               placeholder="مثال: 966501234567" dir="ltr"/>
+        <span class="form-hint">أدخل الرقم بدون + وبدون أصفار في البداية</span>
       </div>
-
       <div class="form-row">
-        <label class="form-label">معامل الانحراف (Multiplier)</label>
-        <input type="number" name="bb_multiplier" class="form-input"
-               value="{{ settings.bb_multiplier }}" min="0.5" max="5.0" step="0.1" />
-        <span class="form-hint">عرض النطاق (الافتراضي: 2.0)</span>
+        <label class="form-label">توكن API واتساب</label>
+        <input type="password" name="whatsapp_token" class="form-input"
+               value="{{ settings.get('whatsapp_token','') }}"
+               placeholder="Bearer Token" autocomplete="off" dir="ltr"/>
+        <span class="form-hint">التوكن الخاص بخدمة الإرسال</span>
       </div>
-
     </div>
-
-    <!-- معاينة الاستراتيجية -->
-    <div class="strategy-preview">
-      <h3 class="preview-title">ملخص الاستراتيجية</h3>
-      <ul class="strategy-list">
-        <li>
-          <span class="strat-icon buy-icon">⬆</span>
-          <strong>إشارة شراء:</strong> يخترق سعر الإغلاق الحد السفلي للبولينجر باند صعوداً + حجم تداول أعلى من المتوسط
-        </li>
-        <li>
-          <span class="strat-icon sell-icon">⬇</span>
-          <strong>إشارة بيع:</strong> يخترق سعر الإغلاق الحد العلوي للبولينجر باند هبوطاً + حجم تداول أعلى من المتوسط
-        </li>
-        <li>
-          <span class="strat-icon">⚡</span>
-          <strong>التنفيذ:</strong> أمر محدود السعر (Limit Order) بسعر إغلاق الشمعة التي ظهرت فيها الإشارة
-        </li>
-      </ul>
+    <!-- زر اختبار الإرسال -->
+    <div style="margin-top:14px">
+      <button type="button" class="btn btn-settings" onclick="testWhatsapp()">
+        📤 إرسال رسالة اختبار
+      </button>
+      <span id="wa-test-result" class="form-hint" style="margin-right:12px"></span>
     </div>
   </div>
 
-  <!-- ====== زر الحفظ ====== -->
   <div class="form-actions">
-    <button type="submit" class="btn btn-save">💾 حفظ الإعدادات</button>
-    <a href="{{ url_for('index') }}" class="btn btn-cancel">إلغاء</a>
+    <button type="submit" class="btn btn-save">💾 حفظ الإعدادات العامة</button>
   </div>
 
 </form>
+
+<!-- ====== إدارة البوتات ====== -->
+<div class="settings-card" style="margin-top:24px">
+  <div class="section-title-row">
+    <h2 class="settings-section-title" style="border:none;margin:0;padding:0">🤖 إدارة البوتات</h2>
+    <button class="btn btn-start" onclick="toggleAddForm()" type="button">+ إضافة بوت جديد</button>
+  </div>
+
+  <!-- نموذج إضافة بوت -->
+  <div id="add-bot-form" style="display:none;margin-top:20px">
+    <form method="post" action="{{ url_for('bot_add') }}" class="bot-form">
+      <h3 class="api-block-title">بوت جديد</h3>
+      <div class="form-grid">
+        <div class="form-row">
+          <label class="form-label">اسم البوت</label>
+          <input type="text" name="name" class="form-input" placeholder="مثال: بوت البيتكوين" required/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">زوج العملة</label>
+          <select name="symbol" class="form-select">
+            {% for sym in symbols %}
+            <option value="{{ sym }}">{{ sym }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">مبلغ الشراء (USDT)</label>
+          <input type="number" name="order_amount" class="form-input" value="10" min="1" step="0.01"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">الإطار الزمني</label>
+          <select name="timeframe" class="form-select">
+            {% for tf_val, tf_lbl in timeframes %}
+            <option value="{{ tf_val }}" {% if tf_val == '1h' %}selected{% endif %}>{{ tf_val }} — {{ tf_lbl }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">فترة BB</label>
+          <input type="number" name="bb_length" class="form-input" value="20" min="5" max="200"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">معامل BB</label>
+          <input type="number" name="bb_multiplier" class="form-input" value="2.0" min="0.5" max="5" step="0.1"/>
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:10px">
+        <label class="form-label toggle-label">
+          <span>السماح بالشراء المتكرر</span>
+          <label class="toggle-switch">
+            <input type="checkbox" name="allow_rebuy"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </label>
+      </div>
+      <div class="form-actions" style="margin-top:16px">
+        <button type="submit" class="btn btn-save">✅ إضافة البوت</button>
+        <button type="button" class="btn btn-cancel" onclick="toggleAddForm()">إلغاء</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- قائمة البوتات الحالية -->
+  {% if bots %}
+  <div style="margin-top:20px;display:flex;flex-direction:column;gap:14px">
+    {% for bot in bots %}
+    <div class="existing-bot-card">
+      <div class="existing-bot-header">
+        <div>
+          <strong>{{ bot.name }}</strong>
+          <span class="tag-symbol" style="margin-right:8px">{{ bot.symbol }}</span>
+          <span class="tag-tf">{{ bot.timeframe }}</span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm btn-sm-stop" type="button"
+                  onclick="toggleEditForm({{ bot.id }})">✏️ تعديل</button>
+          <form method="post" action="{{ url_for('bot_delete', bot_id=bot.id) }}" style="display:inline"
+                onsubmit="return confirm('حذف بوت {{ bot.name }}؟')">
+            <button class="btn-sm btn-sm-emergency" type="submit">🗑 حذف</button>
+          </form>
+        </div>
+      </div>
+      <div class="text-muted text-sm" style="margin-top:6px">
+        مبلغ الشراء: {{ bot.order_amount }} USDT |
+        BB: {{ bot.bb_length }} / {{ bot.bb_multiplier }} |
+        شراء متكرر: {% if bot.allow_rebuy %}نعم{% else %}لا{% endif %}
+      </div>
+
+      <!-- نموذج التعديل -->
+      <div id="edit-bot-{{ bot.id }}" style="display:none;margin-top:14px">
+        <form method="post" action="{{ url_for('bot_edit', bot_id=bot.id) }}" class="bot-form">
+          <div class="form-grid">
+            <div class="form-row">
+              <label class="form-label">اسم البوت</label>
+              <input type="text" name="name" class="form-input" value="{{ bot.name }}" required/>
+            </div>
+            <div class="form-row">
+              <label class="form-label">زوج العملة</label>
+              <select name="symbol" class="form-select">
+                {% for sym in symbols %}
+                <option value="{{ sym }}" {% if bot.symbol == sym %}selected{% endif %}>{{ sym }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-row">
+              <label class="form-label">مبلغ الشراء (USDT)</label>
+              <input type="number" name="order_amount" class="form-input"
+                     value="{{ bot.order_amount }}" min="1" step="0.01"/>
+            </div>
+            <div class="form-row">
+              <label class="form-label">الإطار الزمني</label>
+              <select name="timeframe" class="form-select">
+                {% for tf_val, tf_lbl in timeframes %}
+                <option value="{{ tf_val }}" {% if bot.timeframe == tf_val %}selected{% endif %}>
+                  {{ tf_val }} — {{ tf_lbl }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-row">
+              <label class="form-label">فترة BB</label>
+              <input type="number" name="bb_length" class="form-input"
+                     value="{{ bot.bb_length }}" min="5" max="200"/>
+            </div>
+            <div class="form-row">
+              <label class="form-label">معامل BB</label>
+              <input type="number" name="bb_multiplier" class="form-input"
+                     value="{{ bot.bb_multiplier }}" min="0.5" max="5" step="0.1"/>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:10px">
+            <label class="form-label toggle-label">
+              <span>السماح بالشراء المتكرر</span>
+              <label class="toggle-switch">
+                <input type="checkbox" name="allow_rebuy" {% if bot.allow_rebuy %}checked{% endif %}/>
+                <span class="toggle-slider"></span>
+              </label>
+            </label>
+          </div>
+          <div class="form-actions" style="margin-top:12px">
+            <button type="submit" class="btn btn-save">💾 حفظ التعديلات</button>
+            <button type="button" class="btn btn-cancel" onclick="toggleEditForm({{ bot.id }})">إلغاء</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-position" style="margin-top:16px">
+    لا توجد بوتات بعد — اضغط "إضافة بوت جديد" للبدء
+  </div>
+  {% endif %}
+</div>
 
 {% endblock %}
 
 {% block scripts %}
 <script>
-// تحديث مظهر اختيار الوضع
-document.querySelectorAll('input[name="mode"]').forEach(radio => {
-  radio.addEventListener('change', () => {
-    document.querySelectorAll('.mode-option').forEach(opt => {
-      opt.classList.remove('mode-active', 'mode-live-active');
-    });
-    const parent = radio.closest('.mode-option');
-    parent.classList.add('mode-active');
-    if (radio.value === 'live') parent.classList.add('mode-live-active');
+function toggleAddForm() {
+  const f = document.getElementById('add-bot-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleEditForm(id) {
+  const f = document.getElementById('edit-bot-' + id);
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+document.querySelectorAll('input[name="mode"]').forEach(r => {
+  r.addEventListener('change', () => {
+    document.querySelectorAll('.mode-option').forEach(o => o.classList.remove('mode-active','mode-live-active'));
+    const p = r.closest('.mode-option');
+    p.classList.add('mode-active');
+    if (r.value === 'live') p.classList.add('mode-live-active');
   });
 });
+
+async function testWhatsapp() {
+  const result = document.getElementById('wa-test-result');
+  result.textContent = 'جاري الإرسال...';
+  try {
+    const res  = await fetch('/api/test_whatsapp', {method:'POST'});
+    const data = await res.json();
+    result.textContent = data.success ? '✅ تم الإرسال بنجاح' : '❌ فشل: ' + data.message;
+    result.style.color = data.success ? 'var(--green)' : 'var(--red)';
+  } catch(e) {
+    result.textContent = '❌ خطأ في الاتصال';
+    result.style.color = 'var(--red)';
+  }
+}
 </script>
 {% endblock %}
