@@ -3,169 +3,141 @@
 
 {% block content %}
 
-<!-- ====== ملخص سريع ====== -->
 <section class="section-header">
   <h1 class="page-title">لوحة التحكم</h1>
   <p class="page-sub">
-    الوضع: 
+    الوضع:
     <span class="badge {% if settings.mode == 'live' %}badge-danger{% else %}badge-info{% endif %}">
       {% if settings.mode == 'live' %}🔴 حقيقي{% else %}🔵 افتراضي{% endif %}
     </span>
-    &nbsp;|&nbsp; الزوج: <strong>{{ settings.symbol }}</strong>
-    &nbsp;|&nbsp; الإطار الزمني: <strong>{{ settings.timeframe }}</strong>
+    &nbsp;|&nbsp; رصيد USDT:
+    <strong id="global-balance">{{ "{:,.2f}".format(balance) }}</strong>
+    &nbsp;|&nbsp; عدد البوتات: <strong>{{ bots_status|length }}</strong>
   </p>
 </section>
 
-<!-- ====== بطاقات الملخص ====== -->
-<div class="cards-grid">
-
-  <div class="card" id="card-price">
-    <div class="card-label">السعر الحالي</div>
-    <div class="card-value mono" id="price-value">
-      {% if data.current_price %}
-        {{ "{:,.4f}".format(data.current_price) }}
-      {% else %}
-        — 
-      {% endif %}
-    </div>
-    <div class="card-sub">USDT · {{ settings.symbol }}</div>
-  </div>
-
-  <div class="card" id="card-balance">
-    <div class="card-label">رصيد USDT</div>
-    <div class="card-value mono" id="balance-value">
-      {% if data.usdt_balance %}
-        {{ "{:,.2f}".format(data.usdt_balance) }}
-      {% else %}
-        —
-      {% endif %}
-    </div>
-    <div class="card-sub">المتاح في المحفظة</div>
-  </div>
-
-  <div class="card" id="card-signal">
-    <div class="card-label">آخر إشارة</div>
-    <div class="card-value" id="signal-value">
-      {% if data.last_signal == 'BUY' %}
-        <span class="signal-buy">⬆ شراء</span>
-      {% elif data.last_signal == 'SELL' %}
-        <span class="signal-sell">⬇ بيع</span>
-      {% else %}
-        <span class="signal-none">— محايد</span>
-      {% endif %}
-    </div>
-    <div class="card-sub" id="check-time">
-      {% if data.last_check %}آخر فحص: {{ data.last_check }}{% else %}لم يبدأ الفحص بعد{% endif %}
-    </div>
-  </div>
-
-  <div class="card" id="card-status">
-    <div class="card-label">حالة البوت</div>
-    <div class="card-value" id="status-value">
-      <span class="{% if data.running %}status-running{% else %}status-stopped{% endif %}">
-        {{ data.status }}
-      </span>
-    </div>
-    <div class="card-sub">
-      {% if settings.mode == 'live' %}وضع التداول الحقيقي{% else %}وضع التداول الافتراضي{% endif %}
-    </div>
-  </div>
-
-</div>
-
-<!-- ====== بولينجر باند ====== -->
-{% if data.bb_values and data.bb_values.upper %}
-<div class="bb-strip">
-  <span class="bb-label">بولينجر باند</span>
-  <div class="bb-values">
-    <div class="bb-item">
-      <span class="bb-tag upper">الحد العلوي</span>
-      <span class="bb-num mono">{{ "{:,.4f}".format(data.bb_values.upper) }}</span>
-    </div>
-    <div class="bb-item">
-      <span class="bb-tag middle">الوسط</span>
-      <span class="bb-num mono">{{ "{:,.4f}".format(data.bb_values.middle) }}</span>
-    </div>
-    <div class="bb-item">
-      <span class="bb-tag lower">الحد السفلي</span>
-      <span class="bb-num mono">{{ "{:,.4f}".format(data.bb_values.lower) }}</span>
-    </div>
-  </div>
-</div>
-{% endif %}
-
-<!-- ====== الصفقة الحالية ====== -->
-{% if data.current_position %}
-<div class="position-card">
-  <div class="position-header">
-    <span class="position-icon">📈</span>
-    <span class="position-title">صفقة مفتوحة — {{ data.current_position.symbol }}</span>
-  </div>
-  <div class="position-details">
-    <div class="pos-item">
-      <span class="pos-label">سعر الشراء</span>
-      <span class="pos-val mono">{{ "{:,.6f}".format(data.current_position.buy_price) }} USDT</span>
-    </div>
-    <div class="pos-item">
-      <span class="pos-label">الكمية</span>
-      <span class="pos-val mono">{{ "{:.8f}".format(data.current_position.qty) }}</span>
-    </div>
-    <div class="pos-item">
-      <span class="pos-label">وقت الدخول</span>
-      <span class="pos-val">{{ data.current_position.timestamp }}</span>
-    </div>
-    {% if data.current_price and data.current_position.buy_price %}
-      {% set pnl_pct = ((data.current_price - data.current_position.buy_price) / data.current_position.buy_price * 100) %}
-      <div class="pos-item">
-        <span class="pos-label">الربح/الخسارة</span>
-        <span class="pos-val mono {% if pnl_pct >= 0 %}text-green{% else %}text-red{% endif %}">
-          {{ "{:+.2f}".format(pnl_pct) }}%
-        </span>
-      </div>
-    {% endif %}
-  </div>
-</div>
-{% else %}
-<div class="no-position">
-  <span>لا توجد صفقة مفتوحة حالياً</span>
-</div>
-{% endif %}
-
-<!-- ====== أزرار التحكم ====== -->
+<!-- ====== أزرار التحكم الكلي ====== -->
 <div class="control-panel">
   <div class="control-group">
-    {% if not data.running %}
-      <form action="{{ url_for('start_bot') }}" method="post">
-        <button type="submit" class="btn btn-start">▶ تشغيل البوت</button>
-      </form>
-    {% else %}
-      <form action="{{ url_for('stop_bot') }}" method="post">
-        <button type="submit" class="btn btn-stop">⏹ إيقاف البوت</button>
-      </form>
-    {% endif %}
-
-    <form action="{{ url_for('emergency_sell') }}" method="post"
-          onsubmit="return confirm('⚠️ هل أنت متأكد من تنفيذ البيع الطارئ الآن؟')">
-      <button type="submit" class="btn btn-emergency"
-              {% if not data.current_position %}disabled{% endif %}>
-        🚨 بيع طارئ
-      </button>
+    <form action="{{ url_for('start_all') }}" method="post">
+      <button type="submit" class="btn btn-start">▶ تشغيل الكل</button>
     </form>
+    <form action="{{ url_for('stop_all') }}" method="post">
+      <button type="submit" class="btn btn-stop">⏹ إيقاف الكل</button>
+    </form>
+    <a href="{{ url_for('settings_page') }}" class="btn btn-settings">⚙ إدارة البوتات</a>
+  </div>
+</div>
 
-    <a href="{{ url_for('settings_page') }}" class="btn btn-settings">⚙ الإعدادات</a>
+<!-- ====== لا توجد بوتات ====== -->
+{% if not bots_status %}
+<div class="empty-state">
+  <div class="empty-icon">🤖</div>
+  <p class="empty-title">لا توجد بوتات بعد</p>
+  <p class="empty-sub">اذهب إلى صفحة الإعدادات وأضف بوتاً جديداً لبدء التداول.</p>
+  <a href="{{ url_for('settings_page') }}" class="btn btn-start">⚙ إضافة بوت</a>
+</div>
+{% endif %}
+
+<!-- ====== بطاقات البوتات ====== -->
+<div class="bots-grid">
+{% for bot in bots_status %}
+<div class="bot-card {% if bot.running %}bot-card-running{% endif %}" id="bot-card-{{ bot.id }}">
+
+  <!-- رأس البطاقة -->
+  <div class="bot-card-header">
+    <div class="bot-info">
+      <span class="bot-dot {% if bot.running %}dot-on{% else %}dot-off{% endif %}"></span>
+      <span class="bot-name">{{ bot.name }}</span>
+    </div>
+    <div class="bot-tags">
+      <span class="tag-symbol">{{ bot.symbol }}</span>
+      <span class="tag-tf">{{ bot.timeframe }}</span>
+    </div>
   </div>
 
-  {% if data.error_message %}
-  <div class="error-box">
-    <strong>⚠️ خطأ:</strong> {{ data.error_message }}
+  <!-- السعر والمؤشر -->
+  <div class="bot-price-row">
+    <div>
+      <div class="card-label">السعر الحالي</div>
+      <div class="bot-price mono" id="price-{{ bot.id }}">
+        {% if bot.current_price %}{{ "{:,.4f}".format(bot.current_price) }}{% else %}—{% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="card-label">آخر إشارة</div>
+      <div class="bot-signal" id="signal-{{ bot.id }}">
+        {% if bot.last_signal == 'BUY' %}<span class="signal-buy">⬆ شراء</span>
+        {% elif bot.last_signal == 'SELL' %}<span class="signal-sell">⬇ بيع</span>
+        {% else %}<span class="signal-none">— محايد</span>{% endif %}
+      </div>
+    </div>
+    <div>
+      <div class="card-label">الحالة</div>
+      <div class="bot-status {% if bot.running %}status-running{% else %}status-stopped{% endif %}">
+        {{ bot.status }}
+      </div>
+    </div>
+  </div>
+
+  <!-- BB Values -->
+  {% if bot.bb_values and bot.bb_values.upper %}
+  <div class="bot-bb-row">
+    <span class="bb-tag upper">↑ {{ "{:,.2f}".format(bot.bb_values.upper) }}</span>
+    <span class="bb-tag middle">— {{ "{:,.2f}".format(bot.bb_values.middle) }}</span>
+    <span class="bb-tag lower">↓ {{ "{:,.2f}".format(bot.bb_values.lower) }}</span>
   </div>
   {% endif %}
+
+  <!-- الصفقة الحالية -->
+  {% if bot.position %}
+  <div class="bot-position">
+    <span class="pos-label">صفقة مفتوحة —</span>
+    <span class="mono">شراء بـ {{ "{:,.4f}".format(bot.position.buy_price) }}</span>
+    {% if bot.current_price and bot.position.buy_price %}
+      {% set pnl = ((bot.current_price - bot.position.buy_price) / bot.position.buy_price * 100) %}
+      <span class="{% if pnl >= 0 %}text-green{% else %}text-red{% endif %} mono">
+        ({{ "{:+.2f}".format(pnl) }}%)
+      </span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- أخطاء -->
+  {% if bot.error_message %}
+  <div class="bot-error">⚠️ {{ bot.error_message[:80] }}</div>
+  {% endif %}
+
+  <!-- آخر فحص -->
+  <div class="bot-check-time text-muted" id="check-{{ bot.id }}">
+    {% if bot.last_check %}آخر فحص: {{ bot.last_check }}{% else %}لم يبدأ الفحص{% endif %}
+  </div>
+
+  <!-- أزرار التحكم بهذا البوت -->
+  <div class="bot-card-actions">
+    {% if not bot.running %}
+    <form action="{{ url_for('bot_start', bot_id=bot.id) }}" method="post" style="display:inline">
+      <button type="submit" class="btn-sm btn-sm-start">▶ تشغيل</button>
+    </form>
+    {% else %}
+    <form action="{{ url_for('bot_stop', bot_id=bot.id) }}" method="post" style="display:inline">
+      <button type="submit" class="btn-sm btn-sm-stop">⏹ إيقاف</button>
+    </form>
+    {% endif %}
+    <form action="{{ url_for('bot_emergency', bot_id=bot.id) }}" method="post" style="display:inline"
+          onsubmit="return confirm('⚠️ بيع طارئ لـ {{ bot.name }}؟')">
+      <button type="submit" class="btn-sm btn-sm-emergency"
+              {% if not bot.position %}disabled{% endif %}>🚨 بيع طارئ</button>
+    </form>
+  </div>
+
+</div>
+{% endfor %}
 </div>
 
 <!-- ====== آخر 5 عمليات ====== -->
-
 {% if recent_logs %}
-<div class="recent-section">
+<div class="recent-section" style="margin-top:28px">
   <div class="section-title-row">
     <h2 class="section-title">آخر العمليات</h2>
     <a href="{{ url_for('logs_page') }}" class="view-all-link">عرض الكل ←</a>
@@ -174,17 +146,18 @@
     <thead>
       <tr>
         <th>التوقيت</th>
+        <th>البوت</th>
         <th>النوع</th>
         <th>الزوج</th>
         <th>السعر</th>
-        <th>الكمية</th>
         <th>الحالة</th>
       </tr>
     </thead>
     <tbody>
       {% for log in recent_logs %}
       <tr>
-        <td class="mono text-muted">{{ log.timestamp }}</td>
+        <td class="mono text-muted text-sm">{{ log.timestamp }}</td>
+        <td class="text-sm">{{ log.get('bot_name', '—') }}</td>
         <td>
           <span class="action-badge {% if 'شراء' in log.action %}action-buy{% elif 'بيع' in log.action %}action-sell{% endif %}">
             {{ log.action }}
@@ -192,7 +165,6 @@
         </td>
         <td class="mono">{{ log.symbol }}</td>
         <td class="mono">{{ "{:,.4f}".format(log.price) if log.price else '—' }}</td>
-        <td class="mono">{{ "{:.6f}".format(log.qty) if log.qty else '—' }}</td>
         <td class="text-sm">{{ log.status }}</td>
       </tr>
       {% endfor %}
@@ -205,27 +177,45 @@
 
 {% block scripts %}
 <script>
-function onStatusUpdate(data) {
-  // تحديث السعر
-  const priceEl = document.getElementById('price-value');
-  if (priceEl && data.current_price) {
-    priceEl.textContent = parseFloat(data.current_price).toLocaleString('en', {minimumFractionDigits:4, maximumFractionDigits:6});
-  }
-  // تحديث الرصيد
-  const balEl = document.getElementById('balance-value');
-  if (balEl && data.usdt_balance !== undefined) {
-    balEl.textContent = parseFloat(data.usdt_balance).toLocaleString('en', {minimumFractionDigits:2, maximumFractionDigits:2});
-  }
-  // تحديث الإشارة
-  const sigEl = document.getElementById('signal-value');
-  if (sigEl) {
-    if (data.last_signal === 'BUY')  sigEl.innerHTML = '<span class="signal-buy">⬆ شراء</span>';
-    else if (data.last_signal === 'SELL') sigEl.innerHTML = '<span class="signal-sell">⬇ بيع</span>';
-    else sigEl.innerHTML = '<span class="signal-none">— محايد</span>';
-  }
-  // تحديث وقت الفحص
-  const timeEl = document.getElementById('check-time');
-  if (timeEl && data.last_check) timeEl.textContent = 'آخر فحص: ' + data.last_check;
+async function refreshBots() {
+  try {
+    const res  = await fetch('/api/status');
+    const data = await res.json();
+
+    // رصيد USDT
+    const balEl = document.getElementById('global-balance');
+    if (balEl && data.balance !== undefined) {
+      balEl.textContent = parseFloat(data.balance).toLocaleString('en', {minimumFractionDigits:2});
+    }
+
+    // كل بوت
+    (data.bots || []).forEach(bot => {
+      const priceEl  = document.getElementById(`price-${bot.id}`);
+      const signalEl = document.getElementById(`signal-${bot.id}`);
+      const checkEl  = document.getElementById(`check-${bot.id}`);
+
+      if (priceEl && bot.current_price)
+        priceEl.textContent = parseFloat(bot.current_price).toLocaleString('en', {minimumFractionDigits:4, maximumFractionDigits:6});
+
+      if (signalEl) {
+        if (bot.last_signal === 'BUY')       signalEl.innerHTML = '<span class="signal-buy">⬆ شراء</span>';
+        else if (bot.last_signal === 'SELL') signalEl.innerHTML = '<span class="signal-sell">⬇ بيع</span>';
+        else                                 signalEl.innerHTML = '<span class="signal-none">— محايد</span>';
+      }
+
+      if (checkEl && bot.last_check)
+        checkEl.textContent = 'آخر فحص: ' + bot.last_check;
+    });
+
+    // شريط الحالة العلوي
+    const anyRunning = (data.bots || []).some(b => b.running);
+    const dot = document.getElementById('live-dot');
+    const lbl = document.getElementById('live-label');
+    if (dot) dot.className = anyRunning ? 'dot dot-on' : 'dot dot-off';
+    if (lbl) lbl.textContent = anyRunning ? 'يعمل' : 'متوقف';
+
+  } catch(_) {}
 }
+setInterval(refreshBots, 6000);
 </script>
 {% endblock %}
