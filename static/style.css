@@ -944,3 +944,182 @@ body {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ====== بطاقات البوتات المتعددة ====== */
+.bots-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 18px;
+  margin-bottom: 8px;
+}
+
+.bot-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.bot-card-running {
+  border-color: rgba(0, 208, 132, 0.3);
+  box-shadow: 0 0 16px rgba(0, 208, 132, 0.05);
+}
+
+.bot-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.bot-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bot-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bot-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.bot-tags {
+  display: flex;
+  gap: 6px;
+}
+
+.tag-symbol {
+  font-size: 11px;
+  font-family: var(--mono);
+  background: var(--blue-dim);
+  color: var(--blue);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.tag-tf {
+  font-size: 11px;
+  font-family: var(--mono);
+  background: var(--bg-card2);
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+.bot-price-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background: var(--bg-surface);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.bot-price {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.bot-signal { font-size: 16px; font-weight: 600; }
+
+.bot-status {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.bot-bb-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.bot-position {
+  font-size: 12.5px;
+  background: var(--green-dim);
+  border: 1px solid rgba(0,208,132,0.2);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: var(--text-primary);
+}
+
+.bot-error {
+  font-size: 12px;
+  background: var(--red-dim);
+  border: 1px solid rgba(255,75,92,0.2);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  color: var(--red);
+}
+
+.bot-check-time {
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.bot-card-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border-soft);
+}
+
+/* أزرار صغيرة */
+.btn-sm {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-sm:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-sm-start {
+  background: var(--green-dim);
+  color: var(--green);
+  border-color: rgba(0,208,132,0.3);
+}
+.btn-sm-stop {
+  background: var(--yellow-dim);
+  color: var(--yellow);
+  border-color: rgba(240,192,64,0.3);
+}
+.btn-sm-emergency {
+  background: var(--red-dim);
+  color: var(--red);
+  border-color: rgba(255,75,92,0.3);
+}
+.btn-sm-emergency:disabled { opacity: 0.3; }
+
+/* بطاقة البوت في الإعدادات */
+.existing-bot-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.existing-bot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
