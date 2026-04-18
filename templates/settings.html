@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% block title %}الإعدادات{% endblock %}
+
+{% block content %}
+
+<section class="section-header">
+  <h1 class="page-title">الإعدادات</h1>
+  <p class="page-sub">تخصيص جميع معلمات البوت واستراتيجية التداول</p>
+</section>
+
+<form method="post" action="{{ url_for('settings_page') }}" class="settings-form">
+
+  <!-- ====== وضع التشغيل ====== -->
+  <div class="settings-card">
+    <h2 class="settings-section-title">⚡ وضع التشغيل</h2>
+    <div class="mode-toggle-group">
+      <label class="mode-option {% if settings.mode == 'virtual' %}mode-active{% endif %}">
+        <input type="radio" name="mode" value="virtual"
+               {% if settings.mode == 'virtual' %}checked{% endif %} />
+        <span class="mode-icon">🔵</span>
+        <span class="mode-name">الوضع الافتراضي</span>
+        <span class="mode-desc">Testnet — أموال وهمية للتجربة</span>
+      </label>
+      <label class="mode-option {% if settings.mode == 'live' %}mode-active mode-live-active{% endif %}">
+        <input type="radio" name="mode" value="live"
+               {% if settings.mode == 'live' %}checked{% endif %} />
+        <span class="mode-icon">🔴</span>
+        <span class="mode-name">الوضع الحقيقي</span>
+        <span class="mode-desc">Live — أموال حقيقية، توخَّ الحذر</span>
+      </label>
+    </div>
+    {% if settings.mode == 'live' %}
+    <div class="live-warning">
+      ⚠️ أنت في الوضع الحقيقي! ستُنفَّذ الصفقات بأموال حقيقية.
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ====== مفاتيح API ====== -->
+  <div class="settings-card">
+    <h2 class="settings-section-title">🔑 مفاتيح API</h2>
+
+    <div class="api-block">
+      <h3 class="api-block-title">الوضع الافتراضي — Testnet</h3>
+      <div class="form-row">
+        <label class="form-label">مفتاح API</label>
+        <input type="password" name="virtual_api_key" class="form-input"
+               value="{{ settings.virtual_api_key }}"
+               placeholder="أدخل مفتاح Testnet API" autocomplete="off" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">السر السري</label>
+        <input type="password" name="virtual_api_secret" class="form-input"
+               value="{{ settings.virtual_api_secret }}"
+               placeholder="أدخل Testnet API Secret" autocomplete="off" />
+      </div>
+    </div>
+
+    <div class="api-block api-block-live">
+      <h3 class="api-block-title">الوضع الحقيقي — Live 🔴</h3>
+      <div class="form-row">
+        <label class="form-label">مفتاح API</label>
+        <input type="password" name="live_api_key" class="form-input"
+               value="{{ settings.live_api_key }}"
+               placeholder="أدخل Live API Key" autocomplete="off" />
+      </div>
+      <div class="form-row">
+        <label class="form-label">السر السري</label>
+        <input type="password" name="live_api_secret" class="form-input"
+               value="{{ settings.live_api_secret }}"
+               placeholder="أدخل Live API Secret" autocomplete="off" />
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== إعدادات التداول ====== -->
+  <div class="settings-card">
+    <h2 class="settings-section-title">📊 إعدادات التداول</h2>
+
+    <div class="form-grid">
+
+      <div class="form-row">
+        <label class="form-label">زوج العملة</label>
+        <select name="symbol" class="form-select">
+          {% for sym in symbols %}
+            <option value="{{ sym }}" {% if settings.symbol == sym %}selected{% endif %}>{{ sym }}</option>
+          {% endfor %}
+        </select>
+        <span class="form-hint">الزوج الذي سيتداول البوت عليه</span>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">مبلغ الشراء (USDT)</label>
+        <input type="number" name="order_amount" class="form-input"
+               value="{{ settings.order_amount }}" min="1" step="0.01" />
+        <span class="form-hint">المبلغ بالـ USDT لكل عملية شراء</span>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">الإطار الزمني</label>
+        <select name="timeframe" class="form-select">
+          {% for tf_value, tf_label in timeframes %}
+            <option value="{{ tf_value }}" {% if settings.timeframe == tf_value %}selected{% endif %}>
+              {{ tf_value }} — {{ tf_label }}
+            </option>
+          {% endfor %}
+        </select>
+        <span class="form-hint">الفترة الزمنية لكل شمعة في الرسم البياني</span>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label toggle-label">
+          <span>السماح بالشراء المتكرر</span>
+          <label class="toggle-switch">
+            <input type="checkbox" name="allow_rebuy"
+                   {% if settings.allow_rebuy %}checked{% endif %} />
+            <span class="toggle-slider"></span>
+          </label>
+        </label>
+        <span class="form-hint">
+          إذا كان مفعلاً: يشتري مع كل إشارة جديدة (بشرط وجود رصيد).
+          إذا كان معطلاً: يشتري مرة واحدة فقط حتى تُغلق الصفقة.
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ====== إعدادات المؤشر ====== -->
+  <div class="settings-card">
+    <h2 class="settings-section-title">📐 إعدادات مؤشر بولينجر باند</h2>
+
+    <div class="form-grid">
+
+      <div class="form-row">
+        <label class="form-label">فترة المؤشر (Length)</label>
+        <input type="number" name="bb_length" class="form-input"
+               value="{{ settings.bb_length }}" min="5" max="200" step="1" />
+        <span class="form-hint">عدد الشموع لحساب المتوسط المتحرك (الافتراضي: 20)</span>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">معامل الانحراف (Multiplier)</label>
+        <input type="number" name="bb_multiplier" class="form-input"
+               value="{{ settings.bb_multiplier }}" min="0.5" max="5.0" step="0.1" />
+        <span class="form-hint">عرض النطاق (الافتراضي: 2.0)</span>
+      </div>
+
+    </div>
+
+    <!-- معاينة الاستراتيجية -->
+    <div class="strategy-preview">
+      <h3 class="preview-title">ملخص الاستراتيجية</h3>
+      <ul class="strategy-list">
+        <li>
+          <span class="strat-icon buy-icon">⬆</span>
+          <strong>إشارة شراء:</strong> يخترق سعر الإغلاق الحد السفلي للبولينجر باند صعوداً + حجم تداول أعلى من المتوسط
+        </li>
+        <li>
+          <span class="strat-icon sell-icon">⬇</span>
+          <strong>إشارة بيع:</strong> يخترق سعر الإغلاق الحد العلوي للبولينجر باند هبوطاً + حجم تداول أعلى من المتوسط
+        </li>
+        <li>
+          <span class="strat-icon">⚡</span>
+          <strong>التنفيذ:</strong> أمر محدود السعر (Limit Order) بسعر إغلاق الشمعة التي ظهرت فيها الإشارة
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ====== زر الحفظ ====== -->
+  <div class="form-actions">
+    <button type="submit" class="btn btn-save">💾 حفظ الإعدادات</button>
+    <a href="{{ url_for('index') }}" class="btn btn-cancel">إلغاء</a>
+  </div>
+
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// تحديث مظهر اختيار الوضع
+document.querySelectorAll('input[name="mode"]').forEach(radio => {
+  radio.addEventListener('change', () => {
+    document.querySelectorAll('.mode-option').forEach(opt => {
+      opt.classList.remove('mode-active', 'mode-live-active');
+    });
+    const parent = radio.closest('.mode-option');
+    parent.classList.add('mode-active');
+    if (radio.value === 'live') parent.classList.add('mode-live-active');
+  });
+});
+</script>
+{% endblock %}
