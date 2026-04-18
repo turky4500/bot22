@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}راصد التداول{% endblock %} — Binance Bot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+
+  <!-- ====== الشريط العلوي ====== -->
+  <header class="top-bar">
+    <div class="top-bar-inner">
+      <div class="brand">
+        <span class="brand-icon">⬡</span>
+        <span class="brand-name">راصد التداول</span>
+        <span class="brand-sub">Binance Bot</span>
+      </div>
+      <nav class="main-nav">
+        <a href="{{ url_for('index') }}"        class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">لوحة التحكم</a>
+        <a href="{{ url_for('settings_page') }}" class="nav-link {% if request.endpoint == 'settings_page' %}active{% endif %}">الإعدادات</a>
+        <a href="{{ url_for('logs_page') }}"     class="nav-link {% if request.endpoint == 'logs_page' %}active{% endif %}">سجل العمليات</a>
+      </nav>
+      <div class="status-dot-wrap">
+        <span id="live-dot" class="dot dot-off"></span>
+        <span id="live-label" class="dot-label">متوقف</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ====== Flash Messages ====== -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-zone">
+        {% for cat, msg in messages %}
+          <div class="flash flash-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ====== المحتوى ====== -->
+  <main class="page-content">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ====== التذييل ====== -->
+  <footer class="page-footer">
+    <span>راصد التداول &copy; 2025 — تداول بحكمة وعلى مسؤوليتك</span>
+  </footer>
+
+  <!-- ====== تحديث تلقائي لحالة البوت ====== -->
+  <script>
+    async function refreshStatus() {
+      try {
+        const res  = await fetch('/api/status');
+        const data = await res.json();
+        const dot  = document.getElementById('live-dot');
+        const lbl  = document.getElementById('live-label');
+        if (dot && lbl) {
+          dot.className = data.running ? 'dot dot-on' : 'dot dot-off';
+          lbl.textContent = data.running ? 'يعمل' : 'متوقف';
+        }
+        if (typeof onStatusUpdate === 'function') onStatusUpdate(data);
+      } catch(_) {}
+    }
+    setInterval(refreshStatus, 5000);
+    refreshStatus();
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
