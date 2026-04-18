@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: trading-bot
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --workers 1 --threads 2 --timeout 120
+    plan: free
+    envVars:
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: VIRTUAL_API_KEY
+        sync: false
+      - key: VIRTUAL_API_SECRET
+        sync: false
+      - key: LIVE_API_KEY
+        sync: false
+      - key: LIVE_API_SECRET
+        sync: false
