@@ -22,7 +22,8 @@ trader = Trader()
 def index():
     settings = load_settings()
     data     = trader.get_dashboard_data()
-    return render_template("index.html", settings=settings, data=data)
+    recent_logs = trader.load_logs()[:5]
+    return render_template("index.html", settings=settings, data=data, recent_logs=recent_logs)
 
 
 # ======================================================================
